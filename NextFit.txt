@@ -1,79 +1,57 @@
-class MemoryBlock:
-    def __init__(self, size, allocated=False, process_id=None):
-        self.size = size
-        self.allocated = allocated
-        self.process_id = process_id
+import java.util.Scanner;
 
+public class nextfit {
 
-class MemoryManager:
-    def __init__(self, memory_size):
-        self.memory_size = memory_size
-        self.memory = [MemoryBlock(memory_size)]
-        self.last_allocated_index = -1
+    static void nextFit(int[] blockSize, int[] processSize) {
+        int m = blockSize.length;
+        int n = processSize.length;
+        int[] allocation = new int[n];
+        int blockIndex = 0;
 
-    def next_fit(self, process_id, process_size):
-        for i in range(self.last_allocated_index + 1, len(self.memory)):
-            block = self.memory[i]
+        for (int i = 0; i < n; i++) {
+            while (blockIndex < m && blockSize[blockIndex] < processSize[i]) {
+                blockIndex++;
+            }
 
-            if not block.allocated and block.size >= process_size:
-                self.allocate_memory(i, process_id, process_size)
-                self.last_allocated_index = i
-                return
+            if (blockIndex < m) {
+                allocation[i] = blockIndex + 1;
+                blockSize[blockIndex] -= processSize[i];
+            } else {
+                blockIndex = 0;
+                i--; // Retry the current process in the next iteration
+            }
+        }
 
-        # If no suitable block is found from the last allocated index, start from the beginning
-        for i in range(len(self.memory)):
-            block = self.memory[i]
+        System.out.println("\nProcess Number \tProcess Size\tBlock Number ");
+        for (int i = 0; i < n; i++) {
+            System.out.printf(" %d\t\t\t%d\t\t\t%s\n", i + 1, processSize[i],
+                    allocation[i] != 0 ? String.valueOf(allocation[i]) : "Not Allocated");
+        }
+    }
 
-            if not block.allocated and block.size >= process_size:
-                self.allocate_memory(i, process_id, process_size)
-                self.last_allocated_index = i
-                return
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
 
-        print(f"Not enough memory to allocate Process {process_id} (Size: {process_size}).")
+        System.out.println("Enter the number of memory blocks:");
+        int m = scanner.nextInt();
 
-    def allocate_memory(self, block_index, process_id, process_size):
-        block = self.memory[block_index]
+        System.out.println("Enter the sizes of memory blocks:");
+        int[] blockSize = new int[m];
+        for (int i = 0; i < m; i++) {
+            blockSize[i] = scanner.nextInt();
+        }
 
-        if block.size == process_size:
-            block.allocated = True
-            block.process_id = process_id
-        else:
-            new_block = MemoryBlock(block.size - process_size)
-            self.memory.insert(block_index + 1, new_block)
-            block.size = process_size
-            block.allocated = True
-            block.process_id = process_id
+        System.out.println("Enter the number of processes:");
+        int n = scanner.nextInt();
 
-    def display_memory_status(self):
-        print("\nMemory Status:")
-        for i, block in enumerate(self.memory):
-            status = "Allocated" if block.allocated else "Free"
-            print(f"Block {i + 1}: Size: {block.size}, Status: {status}, Process ID: {block.process_id}")
+        System.out.println("Enter the sizes of processes:");
+        int[] processSize = new int[n];
+        for (int i = 0; i < n; i++) {
+            processSize[i] = scanner.nextInt();
+        }
 
+        nextFit(blockSize, processSize);
 
-def main():
-    memory_size = int(input("Enter the total size of memory: "))
-    memory_manager = MemoryManager(memory_size)
-
-    while True:
-        print("\nMemory Placement Strategy - Next Fit:")
-        print("1. Allocate Process")
-        print("2. Display Memory Status")
-        print("3. Exit")
-
-        choice = int(input("Enter your choice: "))
-
-        if choice == 1:
-            process_id = input("Enter Process ID: ")
-            process_size = int(input("Enter Process Size: "))
-            memory_manager.next_fit(process_id, process_size)
-        elif choice == 2:
-            memory_manager.display_memory_status()
-        elif choice == 3:
-            break
-        else:
-            print("Invalid choice. Please enter a valid option.")
-
-
-if __name__ == "__main__":
-    main()
+        scanner.close();
+    }
+}
